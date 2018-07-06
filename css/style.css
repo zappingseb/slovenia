@@ -1,0 +1,63 @@
+body{
+	font-family: "Open Sans",sans-serif;
+}
+.arrowdown:hover>#arrow{
+    transform: rotate(90deg);
+}
+.arrowdown>h2{
+	float:left
+}
+.arrowdown #arrow{
+	float:left
+}
+
+.arrowdown.rotated #arrow{
+	 transform: rotate(90deg);
+}
+
+.contentelem{
+	display:none;
+}
+
+#mapcontrol{
+	position:fixed;
+	width:5%;
+	right:0px;
+	top:0px;
+}
+#mapid { height: 100%; width:100% }
+
+#mapwrapper{
+	position: fixed;
+    right: 0;
+    top: 50px;
+    visibility: hidden;
+    width: 50%;
+    height: 100%;
+}
+#mapwrapper.active{
+	width:50%;
+	visibility:visible;
+}
+
+.highlight {
+    border: 1px solid;
+    border-color: #dddddd;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.highlight .image {
+    margin: 2%;
+    box-shadow: 5px;
+    max-height: 4000px;
+    overflow:hidden;
+}
+
+.highlight .image img{
+    width: 100%
+}
+
+#highlights{
+    width: 50%
+}

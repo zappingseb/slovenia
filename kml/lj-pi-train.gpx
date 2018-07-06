@@ -1,0 +1,15 @@
+<gpx xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" version="1.1" creator="OpenRouteService.org">
+	<metadata/>
+	<trk>
+		<name/>
+		<desc/>
+		<trkseg>
+			<trkpt lat="46.075321" lon="14.527972">
+				<ele>302.5</ele>
+			</trkpt>	
+			<trkpt lat="45.541905" lon="13.723696">
+				<ele>302.8</ele>
+			</trkpt>			
+		</trkseg>
+	</trk>
+</gpx>

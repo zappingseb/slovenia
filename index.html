@@ -1,0 +1,245 @@
+<html>
+<head>
+<script src="js/jquery-3.3.1.min.js"></script>
+<script src="js/jquery-ui.min.js"></script>
+<link rel="stylesheet" type="text/css" media="all" href="css/style.css">
+<link rel="stylesheet" type="text/css" media="all" href="css/pretty-checkbox.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+  <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.35.1/mapbox-gl.css" rel='stylesheet' />
+  <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.35.1/mapbox-gl.js"></script>
+  <script src="http://rawgit.com/mapbox/mapbox-gl-leaflet/master/leaflet-mapbox-gl.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.3.1/gpx.min.js"></script></head>
+<body>
+
+	<h1>Slovenia Holiday</h1>
+
+	<div id="days">
+		<div class="day">
+			<div class="arrowdown">
+				<h2>Day 1</h2>
+				<div id="arrow">
+					<h2>&rarr;</h2>
+				</div>
+			</div>
+			<div style="clear: both"></div>
+			<div class="contentelem">
+				<p>klasdjflaksdjf</p>
+				<p>jklasdfjlasdf</p>
+			</div>
+		</div>
+
+	</div>
+	<div id="highlights">
+		<h2>Highlights</h2>
+		<ul>
+		</ul>
+	</div>
+
+	<div id="routes">
+		<h2>Routen</h2>
+		<ul>
+			<li><div class='pretty p-switch p-slim' onclick='addRoute(this)'
+					data-file='./kml/bergroute.gpx'>
+					<input type='checkbox' checked />
+					<div class='state'>
+						<label>Bergroute</label>
+					</div>
+				</div></li>
+			<li><div class='pretty p-switch p-slim' onclick='addRoute(this)'
+					data-file='./kml/lj-pi.gpx'>
+					<input type='checkbox' checked />
+					<div class='state'>
+						<label>Ljubljana - Piran</label>
+					</div>
+				</div></li>
+		</ul>
+	</div>
+	<div id="trains">
+		<h2>Z&uuml;ge</h2>
+		<ul>
+			<li><div class='pretty p-switch p-slim' onclick='addTrain(this)'
+					data-file='./kml/lj-pi-train.gpx'>
+					<input type='checkbox' checked />
+					<div class='state'>
+						<label>Ljubljana - Koper Zug</label>
+					</div>
+				</div></li>
+			<li><div class='pretty p-switch p-slim' onclick='addTrain(this)'
+					data-file='./kml/lj-js-train.gpx'>
+					<input type='checkbox' checked />
+					<div class='state'>
+						<label>Ljubljana - Jesenice Zug</label>
+					</div>
+				</div></li>
+
+			<li><div class='pretty p-switch p-slim' onclick='addTrain(this)'
+					data-file='./kml/most-train.gpx'>
+					<input type='checkbox' checked />
+					<div class='state'>
+						<label>Bohinjska Bistrica - Most na Soci* - Sezana -
+							Presnica Zug</label>
+					</div>
+				</div></li>
+		</ul>
+	</div>
+	<div id="mapcontrol">Hide Map</div>
+	<div id="mapwrapper" class="active">
+		<div id="mapid"></div>
+	</div>
+
+
+
+	<script type="text/javascript">
+
+	// Show or hide the content of a day using the arrowdown element
+	$(".arrowdown").click(function(e) {
+		$(this).parent().find(".contentelem").each(function(elem) {
+			if ($(this).is(':visible')) {
+				$(this).hide();
+			} else {
+
+				$(this).show();
+			}
+		})
+		$(this).toggleClass("rotated");
+
+	})
+
+	// Show or hide the map
+	$("#mapcontrol").click(function(e) {
+		if ($("#mapwrapper").hasClass("active")) {
+			$(this).text("Show map");
+		} else {
+			$(this).text("Hide map");
+		}
+		$("#mapwrapper").toggleClass("active");
+
+	})
+
+	var mymap = L.map('mapid').setView([ 46, 14.5 ], 8);
+	var mapRoutes = [];
+	var mapTrains = [];
+	var mapMarkers = [];
+
+	// Add a basic map to the view "mymap"
+	L
+			.tileLayer(
+					'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}',
+					{
+						attribution : 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery ? <a href="https://www.mapbox.com/">Mapbox</a>',
+						maxZoom : 18,
+						id : 'mapbox.streets',
+						accessToken : 'pk.eyJ1IjoiemFwcGluZ3NlYiIsImEiOiJjaW14a2lhdTYwMGRmd2VtMmZhY2h0N2JtIn0.B3apneYn9eDwyl7x2gP0Og'
+					}).addTo(mymap);
+
+	// Backend for highlights stored in GDrive
+	// Get the Spreadsheet containing all highlights and add for each
+	// Highlight an on/off switch
+	$
+			.getJSON(
+					"https://spreadsheets.google.com/feeds/list/18RNz9xkD-cCadsKuPFw9-Y6r7MimFIgarJtkg27TK2U/od6/public/values?alt=json",
+					function(data) {
+						//first row "title" column
+						for (i = 0; i < data.feed.entry.length; i++) {
+							$("#highlights ul")
+									.append(
+											"<li>"+
+											"<div class='highlight'>"+
+											"<div class='pretty p-switch p-slim' onclick='addmarker(this)' href='#' data-long='"
+														+
+														// Get the Longitudinal and Latitudinal coordinates of the Highlight
+														data.feed.entry[i]['gsx$long']['$t']
+														+ "' data-lat='"
+														+ data.feed.entry[i]['gsx$lat']['$t']
+														+ "'>"
+														+ "<input type='checkbox' /><div class='state'><label>"
+														+
+														// Insert the name (Ort) of the field
+														data.feed.entry[i]['gsx$ort']['$t']
+														+ "</label></div></div></div></li>")
+							}
+						});
+
+		// function to add a marker element to the map
+		addmarker = function(element) {
+
+			for (var i = 0; i < mapMarkers.length; i++) {
+				mymap.removeLayer(mapMarkers[i]);
+			}
+
+			$(element).parent().parent().find("div.pretty").each(
+					function(e) {
+
+						if ($(this).find("input").is(":checked")) {
+							marker = L.marker(
+									[ this.getAttribute("data-long"),
+											this.getAttribute("data-lat") ])
+									.addTo(mymap);
+							mapMarkers.push(marker);
+						}
+					})
+
+		}
+
+		// function to add sth to the layer route
+		addRoute = function(element) {
+
+			for (var i = 0; i < mapRoutes.length; i++) {
+				mymap.removeLayer(mapRoutes[i]);
+			}
+
+			$(element).parent().parent().find("div.pretty").each(function(e) {
+
+				if ($(this).find("input").is(":checked")) {
+					route = new L.GPX(this.getAttribute("data-file"), {
+						async : true
+					}).on('loaded', function(e) {
+						mymap.fitBounds(e.target.getBounds());
+					}).addTo(mymap)
+					mapRoutes.push(route);
+
+				}
+
+			})
+			mymap.setView([ 46, 14.5 ], 8);
+		}
+		// Function to add sth to the layer train
+		addTrain = function(element) {
+
+			for (var i = 0; i < mapTrains.length; i++) {
+				mymap.removeLayer(mapTrains[i]);
+			}
+
+			$(element).parent().parent().find("div.pretty").each(function(e) {
+
+				if ($(this).find("input").is(":checked")) {
+					train = new L.GPX(this.getAttribute("data-file"), {
+						async : true,
+						polyline_options : {
+							color : 'green'
+						}
+					}).on('loaded', function(e) {
+						mymap.fitBounds(e.target.getBounds());
+					}).addTo(mymap)
+					mapTrains.push(train);
+				}
+			})
+			mymap.setView([ 46, 14.5 ], 8);
+		}
+
+		// Start showing Routes and trains
+		$(document).ready(function(e) {
+
+			$("#routes").find("div.pretty").each(function(e) {
+				addRoute(this)
+			});
+			$("#trains").find("div.pretty").each(function(e) {
+				addTrain(this)
+			});
+
+			mymap.setView([ 46, 14.5 ], 8);
+		});
+	</script>
+</body>
+</html>
