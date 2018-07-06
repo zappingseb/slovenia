@@ -45,10 +45,14 @@ body{
     border-color: #dddddd;
     padding: 20px;
     border-radius: 10px;
+    clear: both;
+    overflow:  hidden;
 }
 
 .highlight .image {
     margin: 2%;
+    width: 32%;
+    float:left;
     box-shadow: 5px;
     max-height: 4000px;
     overflow:hidden;
