@@ -18,32 +18,18 @@
 <script src="js/leaflet.awesome-markers.min.js"></script>
 <script src="http://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 <body>
-	<button type="submit" onclick="UserAction()">Search</button>
-	<table id="example"></div>
-
-	<h1>Slovenia Holiday</h1>
-
-	<div id="days">
-		<div class="day">
-			<div class="arrowdown">
-				<h2>Day 1</h2>
-				<div id="arrow">
-					<h2>&rarr;</h2>
-				</div>
-			</div>
-			<div style="clear: both"></div>
-			<div class="contentelem">
-				<p>klasdjflaksdjf</p>
-				<p>jklasdfjlasdf</p>
-			</div>
-		</div>
-
-	</div>
+	<div id="highlights-change" class="toggler">Highlights</div>
 	<div id="highlights">
-		<h2>Highlights</h2>
 		<ul>
 		</ul>
 	</div>
+	
+	<table id="example" style="z-index:0"></div>
+
+	<div style="height:50px"></div>
+	<h1>Slovenia Holiday</h1>
+
+	
 
 	<div id="routes">
 		<h2>Fahrrad - Routen</h2>
@@ -113,8 +99,8 @@
 				</div></li>
 		</ul>
 	</div>
-	<div id="mapcontrol">Hide Map</div>
-	<div id="mapwrapper" class="active">
+	<div id="mapcontrol" class="toggler" style="z-index:5;">Hide Map</div>
+	<div id="mapwrapper" style="z-index:5;" class="active">
 		<div id="mapid"></div>
 	</div>
 
@@ -140,17 +126,33 @@
 	$("#mapcontrol").click(function(e) {
 		if ($("#mapwrapper").hasClass("active")) {
 			$(this).text("Show map");
+			
+			$(this).toggleClass("active");
 		} else {
 			$(this).text("Hide map");
+			$(this).toggleClass("active");
 		}
 		$("#mapwrapper").toggleClass("active");
 
 	})
+	$("#highlights-change").click(function(e) {
+		$("#highlights").toggleClass("active");
+		if ($("#mapwrapper").hasClass("active")) {
+			$(this).text("Hide Highlights");}else{
+				$(this).text("Highlights");
+			}
+		$("#highlights-change").toggleClass("active");
+
+	})
 
 	var mymap = L.map('mapid').setView([45.990623, 13.909995 ], 9);
+	
 	var mapRoutes = [];
 	var mapTrains = [];
 	var mapMarkers = [];
+	var mapRoutes_geojson = [];
+	var geojson = null
+	var marker_simple = null
 
 	// Add a basic map to the view "mymap"
 	L.tileLayer(
@@ -305,8 +307,41 @@
 				}
 			})
 		}
-		function UserAction() {
-		    var xhttp = new XMLHttpRequest();
+		addGEOjson = function(element){
+			
+			// if this is has a routejson
+			if(geojson!=null){
+				
+				mymap.removeLayer(geojson);
+			}
+      		geojson = new L.geoJSON($(element).data('routejson'),{
+      			style:{
+      				weight:6
+      			}
+      		});
+      		geojson.addTo(mymap)
+		}
+		addMarkerSimple = function(element){
+			
+			// if this is has a routejson
+			if(marker_simple!=null){
+				mymap.removeLayer(marker_simple);
+			}
+      		marker_simple =
+				L.marker(
+					[ $(element).data("long"),
+					  $(element).data("lat") ],
+				{icon:L.AwesomeMarkers.icon({
+				    icon: $(element).data("icon"),
+				    markerColor: 'red',
+				    prefix: 'fa'
+				  })}			
+				).bindPopup($(element).data("name"))
+				.addTo(mymap);
+		}
+		
+		function derive_directions(from,to,by) {
+			var outjson
 		    var api_key = "";
 		    $.ajax({url: './api_key.txt',
             type: 'get',
@@ -316,17 +351,20 @@
             	api_key = api_key + twig
             }
 		    })
-		    $.getJSON( "https://api.openrouteservice.org/directions?api_key="+
+		    outjson = $.getJSON( {url:"https://api.openrouteservice.org/directions?api_key="+
 	    		api_key
-	    		+"&coordinates=8.34234%2C48.23424%7C8.34423%2C48.26424&profile=driving-car&format=json",
-	    		function( data ) {
-		    	  var items = [];
-		    	  $.each( data, function( key, val ) {
-		    	    alert(key)
-		    	  });
-		    	 
-		    	});
-		}//UserAction
+	    		+"&coordinates="+from[0]+"%2C"+from[1]+"%7C"+to[0]+"%2C"+to[1]+"&profile="+by+"&elevation=true&format=geojson", 
+				function( data ) {
+				  var items = [];
+				  $.each( data, function( key, val ) {
+				    alert(key)
+				  });  
+		    },
+			  async: false
+		    });
+		    return outjson
+		}//derive_directions
+		
 		
 		// Start showing Routes and trains
 		$(document).ready(function(e) {
@@ -348,15 +386,104 @@
 				"aoColumns": [
 				{ "mDataProp": "gsx$day.$t" },
 				{ "mDataProp": "gsx$name.$t" },
-				{ "mDataProp": "gsx$lat.$t" },
+				{ "mDataProp": "gsx$duration.$t" },
+				{ "mDataProp": "gsx$image.$t" },
+				{ "mDataProp": "gsx$description.$t" },
+				{ "mDataProp": "gsx$cost.$t" },
 				{ "mDataProp": "gsx$long.$t" },
+				{ "mDataProp": "gsx$lat.$t" }
 				],
 				"columnDefs": [
 				               { "title": "Tag", "targets": 0 },
-				               { "title": "Name", "targets": 0 },
-				               { "title": "Lat", "targets": 1 },
-				               { "title": "Long", "targets": 2 }
-				             ]	
+				               { "title": "Name", "targets": 1 },
+				               { "title": "Duration", "targets": 2 },
+				               { "title": "Image", "targets": 3 },
+				               { "title": "Description", "targets": 4 },
+				               { "title": "Cost", "targets": 5 },
+				               { "title": "Long", "targets": 6 },
+				               { "title": "Lat", "targets": 7 }
+				             ],
+	             "rowCallback": function( row, data, index  ) {
+	            	 	// in case this is not a place but a route or a connection
+	            	    if ( $('td:eq(6)', row).text() == "" ) {
+	            	    	
+	            	    	var from = [0,0]
+	            	    	var to = [0,0]
+	            	    	for(var refindex = index; refindex >= 0; refindex--){
+	            	    		// check if there is a longitude
+	            	    		if(!table.rows(refindex).data()[0].gsx$long['$t']==""){
+									from = [
+										table.rows(refindex).data()[0].gsx$lat['$t'],
+										table.rows(refindex).data()[0].gsx$long['$t']
+									        ]
+									break
+								}
+	            	    	}//for
+	            	    	// go up in lines and check for long/lat nominations
+	            	    	for(var refindex = index+1; refindex <= 200; refindex++){
+	            	    		// check if there is a longitude
+	            	    		if(!table.rows(refindex).data()[0].gsx$long['$t']==""){
+									to = [
+										table.rows(refindex).data()[0].gsx$lat['$t'],
+										table.rows(refindex).data()[0].gsx$long['$t']
+									        ]
+									break
+								}
+	            	    	}//for
+	            	    	if(table.rows(index).data()[0].gsx$by['$t']!=""){
+	            	    		if(table.rows(index).data()[0].gsx$by['$t']=="car"){
+	            	    			by = "driving-car"
+	            	    		}else{
+	            	    			by = "cycling-road"
+	            	    		}
+	            	    	}else{
+	            	    		by="driving-car"
+	            	    	}
+	            	    	
+	            	    	geojson_data = derive_directions(from,to,by);
+	            	    	distance_in_km = geojson_data.responseJSON.features[0].properties.summary[0].distance/1000
+	            	    	duration_h = geojson_data.responseJSON.features[0].properties.summary[0].duration/60/60
+	            	    	ascent = geojson_data.responseJSON.features[0].properties.summary[0].ascent
+	            	    	descent = geojson_data.responseJSON.features[0].properties.summary[0].descent
+	            	    	
+	            	    	$('td:eq(2)', row).html($('td:eq(2)', row).html() + 
+	            	    			"<br/>Duration (h): " + duration_h.toFixed(2) +
+	            	    			"<br/>Distance (km): " + distance_in_km.toFixed(2)+
+	            	    			"<br/>Ascent (m): " + ascent.toFixed(2)  +
+	            	    			"<br/>Descent (m): " + descent.toFixed(2))
+	            	    			;
+	            	    	$('td:eq(0)', row).data('routejson',geojson_data.responseJSON);
+	            	    }else{
+	            	    	$('td:eq(0)', row).data('lat',table.rows(index).data()[0].gsx$lat['$t']);
+	            	    	$('td:eq(0)', row).data('long',table.rows(index).data()[0].gsx$long['$t']);
+	            	    	$('td:eq(0)', row).data('icon',table.rows(index).data()[0].gsx$icon['$t']);
+	            	    	$('td:eq(0)', row).data('name',table.rows(index).data()[0].gsx$name['$t']);
+	            	    	
+	            	    }
+	            	 	if(index>0){
+	            	 		
+		            	 	if($('td:eq(0)',row).html() != table.rows(index-1).data()[0].gsx$day['$t']){
+		            	 		$( table.rows( index ).nodes() ).addClass( 'highlight' );
+		            	 	}
+	            	 	}else{
+		            	 		$( table.rows( index ).nodes() ).addClass( 'highlight' );
+	            	 		
+	            	 	}
+	            	 	// if an image is provided
+	            	 	 if ( $('td:eq(3)', row).text() != "" ) {
+	            	 		var pattern = /((http|https|ftp|data\:image).*)/;
+							if(pattern.test($('td:eq(3)', row).text())){
+								
+								image_link  = "<div class='image'><img src='"+$('td:eq(3)', row).text()+"'/>" + 
+									"<br/><a style='font-size:4px;color:#e2e2e2'>from: "+$('td:eq(3)', row).text()+"</a>"+
+									"</div>"
+								
+							}else{
+								image_link  = "<div class='image'><img src='./img/"+$('td:eq(3)', row).text()+"'/></div>"
+							}
+							 $('td:eq(3)', row).html(image_link)
+	            	 	 }
+	            	  }
 			});
 			$('#example tbody').on( 'click', 'tr', function () {
 				if ( $(this).hasClass('selected') ) {
@@ -365,8 +492,16 @@
 		        else {
 		            table.$('tr.selected').removeClass('selected');
 		            $(this).addClass('selected');
+		            $(this).find("td").each(function(e){
+		            	if($(this).data('routejson')!=null){
+			            	addGEOjson(this)
+		            	}else if($(this).data('lat')!=null){
+		            		addMarkerSimple(this)
+		            	}
+		            });//each
 		        }
 		    } );
+			
 			table.on( 'select', function ( e, dt, type, indexes ) {
 	            var rowData = table.rows( indexes ).data().toArray();
 	            events.prepend( '<div><b>'+type+' selection</b> - '+JSON.stringify( rowData )+'</div>' );

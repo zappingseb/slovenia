@@ -48,20 +48,59 @@ body{
     clear: both;
     overflow:  hidden;
 }
-
-.highlight .image {
-    margin: 2%;
-    width: 32%;
-    float:left;
-    box-shadow: 5px;
-    max-height: 4000px;
-    overflow:hidden;
+tr.highlight {
+    border-top: 2px solid black;
+    background-color: #a9cce2 !important;
 }
 
-.highlight .image img{
+td div.image {
+    margin: 2%;
+    max-width: 400px;
+    overflow:hidden;
+}
+.image img{
     width: 100%
+    
+}
+#highlights-change{
+	 top:0px;
+	 left:0px;
+	 position:fixed;
+	 z-index:5
+}
+#highlights{
+    width: 50%;
+    position:fixed;
+    border-bottom: 2px solid black;
+    z-index:5;
+    bottom:50px;
+    overflow: scroll;
+    top: 50px;
+    left:0px;
 }
 
 #highlights{
-    width: 50%
+	visibility:hidden;
+}
+#highlights.active{
+	width:50%;
+	visibility:visible;
+	background-color:white;
+	
+}
+.toggler {
+  color: #fff;
+  background-color: #193047;
+  background-image: linear-gradient(top, #27496d, #193047);
+  box-shadow: inset 0 0 0 1px #27496d;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.toggler:hover {
+  box-shadow: inset 0 0 0 1px #27496d,0 1px 2px #ffffff;
+}
+.toggler.active {
+  box-shadow: inset 0 0 0 1px #27496d,inset 0 1px 4px #ffffff;
 }
