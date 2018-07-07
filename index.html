@@ -6,6 +6,7 @@
 <link rel="stylesheet" type="text/css" media="all" href="css/style.css">
 <link rel="stylesheet" type="text/css" media="all" href="css/pretty-checkbox.min.css">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+<link rel="stylesheet" href="https:////cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
 <link rel="stylesheet" type="text/css" media="all" href="css/leaflet.awesome-markers.css">
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
@@ -15,7 +16,10 @@
   <script src="http://rawgit.com/mapbox/mapbox-gl-leaflet/master/leaflet-mapbox-gl.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.3.1/gpx.min.js"></script></head>
 <script src="js/leaflet.awesome-markers.min.js"></script>
+<script src="http://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 <body>
+	<button type="submit" onclick="UserAction()">Search</button>
+	<table id="example"></div>
 
 	<h1>Slovenia Holiday</h1>
 
@@ -162,7 +166,7 @@
 	// Get the Spreadsheet containing all highlights and add for each
 	// Highlight an on/off switch
 	$.getJSON(
-					"https://spreadsheets.google.com/feeds/list/18RNz9xkD-cCadsKuPFw9-Y6r7MimFIgarJtkg27TK2U/od6/public/values?alt=json",
+					"https://spreadsheets.google.com/feeds/list/18RNz9xkD-cCadsKuPFw9-Y6r7MimFIgarJtkg27TK2U/1/public/values?alt=json",
 					function(data) {
 						
 						
@@ -171,7 +175,17 @@
 							if(data.feed.entry[i]['gsx$image']['$t']==""){
 								image_link=""
 							}else{
-								image_link  = "<img class='image' src='./img/"+data.feed.entry[i]['gsx$image']['$t']+"'/>"
+								var pattern = /((http|https|ftp|data\:image).*)/;
+								if(pattern.test(data.feed.entry[i]['gsx$image']['$t'])){
+									
+									image_link  = "<div class='image'><img src='"+data.feed.entry[i]['gsx$image']['$t']+"'/>" + 
+										"<br/><a style='font-size:4px;color:#e2e2e2'>from: "+data.feed.entry[i]['gsx$image']['$t']+"</a>"+
+										"</div>"
+									
+								}else{
+									
+									image_link  = "<div class='image'><img src='./img/"+data.feed.entry[i]['gsx$image']['$t']+"'/></div>"
+								}
 							}
 							
 							
@@ -291,7 +305,29 @@
 				}
 			})
 		}
-
+		function UserAction() {
+		    var xhttp = new XMLHttpRequest();
+		    var api_key = "";
+		    $.ajax({url: './api_key.txt',
+            type: 'get',
+            async: false,
+            success: function(html) {
+            	var twig = String(html);
+            	api_key = api_key + twig
+            }
+		    })
+		    $.getJSON( "https://api.openrouteservice.org/directions?api_key="+
+	    		api_key
+	    		+"&coordinates=8.34234%2C48.23424%7C8.34423%2C48.26424&profile=driving-car&format=json",
+	    		function( data ) {
+		    	  var items = [];
+		    	  $.each( data, function( key, val ) {
+		    	    alert(key)
+		    	  });
+		    	 
+		    	});
+		}//UserAction
+		
 		// Start showing Routes and trains
 		$(document).ready(function(e) {
 
@@ -301,7 +337,41 @@
 			$("#trains").find("div.pretty").each(function(e) {
 				addTrain(this)
 			});
-
+			var events = $('#events');
+			var table = $('#example').DataTable( {
+				"bServerSide":false,
+				"paging":false,
+				"serverSide": true,
+				"bProcessing":true,
+				"sAjaxDataProp": "feed.entry",
+				"sAjaxSource": "https://spreadsheets.google.com/feeds/list/18RNz9xkD-cCadsKuPFw9-Y6r7MimFIgarJtkg27TK2U/2/public/values?alt=json",
+				"aoColumns": [
+				{ "mDataProp": "gsx$day.$t" },
+				{ "mDataProp": "gsx$name.$t" },
+				{ "mDataProp": "gsx$lat.$t" },
+				{ "mDataProp": "gsx$long.$t" },
+				],
+				"columnDefs": [
+				               { "title": "Tag", "targets": 0 },
+				               { "title": "Name", "targets": 0 },
+				               { "title": "Lat", "targets": 1 },
+				               { "title": "Long", "targets": 2 }
+				             ]	
+			});
+			$('#example tbody').on( 'click', 'tr', function () {
+				if ( $(this).hasClass('selected') ) {
+		            $(this).removeClass('selected');
+		        }
+		        else {
+		            table.$('tr.selected').removeClass('selected');
+		            $(this).addClass('selected');
+		        }
+		    } );
+			table.on( 'select', function ( e, dt, type, indexes ) {
+	            var rowData = table.rows( indexes ).data().toArray();
+	            events.prepend( '<div><b>'+type+' selection</b> - '+JSON.stringify( rowData )+'</div>' );
+	        } )
+	        
 			mymap.setView([ 45.990623, 13.909995 ], 9);
 		});
 	</script>
