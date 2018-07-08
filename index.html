@@ -18,21 +18,19 @@
 <script src="js/leaflet.awesome-markers.min.js"></script>
 <script src="http://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 <body>
+<div id="left_changes">
 	<div id="highlights-change" class="toggler">Highlights</div>
-	<div id="highlights">
+	<div id="routes-change" class="toggler">Bike Routes</div>
+	<div id="trains-change" class="toggler">Trains</div>
+
+</div>
+	<div id="highlights" class="fixy">
 		<ul>
 		</ul>
 	</div>
 	
-	<table id="example" style="z-index:0"></div>
-
-	<div style="height:50px"></div>
-	<h1>Slovenia Holiday</h1>
-
-	
-
-	<div id="routes">
-		<h2>Fahrrad - Routen</h2>
+	<div id="routes" class="fixy">
+	<h2>Fahrrad - Routen</h2>
 		<ul>
 			<li><div class='pretty p-switch p-slim' onclick='addRoute(this)'
 					data-file='./kml/bergroute.gpx'>
@@ -71,7 +69,9 @@
 				</div></li>
 		</ul>
 	</div>
-	<div id="trains">
+	
+
+	<div id="trains" class="fixy">
 		<h2>Z&uuml;ge</h2>
 		<ul>
 			<li><div class='pretty p-switch p-slim' onclick='addTrain(this)'
@@ -99,6 +99,12 @@
 				</div></li>
 		</ul>
 	</div>
+	<table id="example" style="z-index:0"></div>
+
+	<div style="height:50px"></div>
+	<h1>Slovenia Holiday</h1>
+
+	
 	<div id="mapcontrol" class="toggler" style="z-index:5;">Hide Map</div>
 	<div id="mapwrapper" style="z-index:5;" class="active">
 		<div id="mapid"></div>
@@ -137,7 +143,9 @@
 	})
 	$("#highlights-change").click(function(e) {
 		$("#highlights").toggleClass("active");
-		if ($("#mapwrapper").hasClass("active")) {
+		$("#routes").removeClass("active");
+		$("#trains").removeClass("active");
+		if ($("#highlights").hasClass("active")) {
 			$(this).text("Hide Highlights");}else{
 				$(this).text("Highlights");
 			}
@@ -145,6 +153,29 @@
 
 	})
 
+	$("#routes-change").click(function(e) {
+		$("#routes").toggleClass("active");
+		$("#trains").removeClass("active");
+		$("#highlights").removeClass("active");
+		if ($("#routes").hasClass("active")) {
+			$(this).text("Hide Bike Routes");}else{
+				$(this).text("Bike Routes");
+			}
+		$("#routes-change").toggleClass("active");
+
+	})
+	$("#trains-change").click(function(e) {
+		$("#trains").toggleClass("active");
+		$("#routes").removeClass("active");
+		$("#highlights").removeClass("active");
+		if ($("#trains").hasClass("active")) {
+			$(this).text("Hide Trains");}else{
+				$(this).text("Trains");
+			}
+		$("#trains-change").toggleClass("active");
+
+	})
+	
 	var mymap = L.map('mapid').setView([45.990623, 13.909995 ], 9);
 	
 	var mapRoutes = [];
@@ -382,6 +413,7 @@
 				"serverSide": true,
 				"bProcessing":true,
 				"sAjaxDataProp": "feed.entry",
+				"searching":false,
 				"sAjaxSource": "https://spreadsheets.google.com/feeds/list/18RNz9xkD-cCadsKuPFw9-Y6r7MimFIgarJtkg27TK2U/2/public/values?alt=json",
 				"aoColumns": [
 				{ "mDataProp": "gsx$day.$t" },
@@ -405,7 +437,7 @@
 				             ],
 	             "rowCallback": function( row, data, index  ) {
 	            	 	// in case this is not a place but a route or a connection
-	            	    if ( $('td:eq(6)', row).text() == "" ) {
+	            	    if ( table.rows(index).data()[0].gsx$long['$t'] == "" ) {
 	            	    	
 	            	    	var from = [0,0]
 	            	    	var to = [0,0]
@@ -433,7 +465,9 @@
 	            	    	if(table.rows(index).data()[0].gsx$by['$t']!=""){
 	            	    		if(table.rows(index).data()[0].gsx$by['$t']=="car"){
 	            	    			by = "driving-car"
-	            	    		}else{
+	            	    		}else if(table.rows(index).data()[0].gsx$by['$t']=="feet"){
+									by = "foot-walking"
+								}else{
 	            	    			by = "cycling-road"
 	            	    		}
 	            	    	}else{
@@ -460,9 +494,8 @@
 	            	    	$('td:eq(0)', row).data('name',table.rows(index).data()[0].gsx$name['$t']);
 	            	    	
 	            	    }
-	            	 	if(index>0){
-	            	 		
-		            	 	if($('td:eq(0)',row).html() != table.rows(index-1).data()[0].gsx$day['$t']){
+	            	 	if(index>0){	            	 		
+		            	 	if(table.rows(index).data()[0].gsx$day['$t'] != table.rows(index-1).data()[0].gsx$day['$t']){
 		            	 		$( table.rows( index ).nodes() ).addClass( 'highlight' );
 		            	 	}
 	            	 	}else{

@@ -62,13 +62,13 @@ td div.image {
     width: 100%
     
 }
-#highlights-change{
+#left_changes{
 	 top:0px;
 	 left:0px;
 	 position:fixed;
 	 z-index:5
 }
-#highlights{
+.fixy{
     width: 50%;
     position:fixed;
     border-bottom: 2px solid black;
@@ -79,15 +79,19 @@ td div.image {
     left:0px;
 }
 
-#highlights{
+.fixy{
 	visibility:hidden;
 }
-#highlights.active{
+
+
+.fixy.active{
 	width:50%;
 	visibility:visible;
 	background-color:white;
 	
 }
+
+
 .toggler {
   color: #fff;
   background-color: #193047;
@@ -96,6 +100,7 @@ td div.image {
   border: none;
   border-radius: 8px;
   padding: 10px;
+  float:left;
 }
 
 .toggler:hover {
