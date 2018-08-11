@@ -20,8 +20,6 @@
 <body>
 <div id="left_changes">
 	<div id="highlights-change" class="toggler">Highlights</div>
-	<div id="routes-change" class="toggler">Bike Routes</div>
-	<div id="trains-change" class="toggler">Trains</div>
 
 </div>
 	<div id="highlights" class="fixy">
@@ -29,80 +27,10 @@
 		</ul>
 	</div>
 	
-	<div id="routes" class="fixy">
-	<h2>Fahrrad - Routen</h2>
-		<ul>
-			<li><div class='pretty p-switch p-slim' onclick='addRoute(this)'
-					data-file='./kml/bergroute.gpx'>
-					<input type='checkbox' checked />
-					<div class='state'>
-						<label>Bergroute</label>
-					</div>
-				</div></li>
-			<li><div class='pretty p-switch p-slim' onclick='addRoute(this)'
-					data-file='./kml/lj-pi.gpx'>
-					<input type='checkbox' />
-					<div class='state'>
-						<label>Ljubljana - Piran</label>
-					</div>
-				</div></li>
-			<li><div class='pretty p-switch p-slim' onclick='addRoute(this)'
-					data-file='./kml/Krajna.gpx'  data-width='3'>
-					<input type='checkbox' checked />
-					<div class='state'>
-						<label>Rund um Krajna (43 km, 900Hm)</label>
-					</div>
-				</div></li>
-			<li><div class='pretty p-switch p-slim' onclick='addRoute(this)'
-					data-file='./kml/Kras1.gpx' data-width='2'>
-					<input type='checkbox' checked />
-					<div class='state'>
-						<label>Kras 1 (83km, 900Hm)</label>
-					</div>
-				</div></li>
-			<li><div class='pretty p-switch p-slim' onclick='addRoute(this)'
-					data-file='./kml/Kras_short.gpx'  data-width='1'>
-					<input type='checkbox'  />
-					<div class='state'>
-						<label>Kras kurz (57 km, 700Hm)</label>
-					</div>
-				</div></li>
-		</ul>
-	</div>
-	
-
-	<div id="trains" class="fixy">
-		<h2>Z&uuml;ge</h2>
-		<ul>
-			<li><div class='pretty p-switch p-slim' onclick='addTrain(this)'
-					data-file='./kml/lj-pi-train.gpx'>
-					<input type='checkbox' checked />
-					<div class='state'>
-						<label>Ljubljana - Koper Zug</label>
-					</div>
-				</div></li>
-			<li><div class='pretty p-switch p-slim' onclick='addTrain(this)'
-					data-file='./kml/lj-js-train.gpx'>
-					<input type='checkbox' checked />
-					<div class='state'>
-						<label>Ljubljana - Jesenice Zug</label>
-					</div>
-				</div></li>
-
-			<li><div class='pretty p-switch p-slim' onclick='addTrain(this)'
-					data-file='./kml/most-train.gpx'>
-					<input type='checkbox' checked />
-					<div class='state'>
-						<label>Bohinjska Bistrica - Most na Soci* - Sezana -
-							Presnica Zug</label>
-					</div>
-				</div></li>
-		</ul>
-	</div>
 	<table id="example" style="z-index:0"></div>
 
 	<div style="height:50px"></div>
-	<h1>Slovenia Holiday</h1>
+	<h1>Indonesia Holiday</h1>
 
 	
 	<div id="mapcontrol" class="toggler">Hide Map</div>
@@ -386,7 +314,7 @@
 		}
 		
 		function derive_directions(from,to,by) {
-			if(by=="plane"){
+			if(by=="plane" || by=="boat"){
 				text = '{"features":['+
 				  '{"geometry":{'+
 					 '  "type": "LineString",'+
@@ -548,6 +476,8 @@
 									by = "foot-walking"
 	            	    		}else if(table.rows(index).data()[0].gsx$by['$t']=="plane"){
 									by = "plane"
+								}else if(table.rows(index).data()[0].gsx$by['$t']=="boat"){
+									by = "boat"
 								}else{
 	            	    			by = "cycling-road"
 	            	    		}
@@ -557,7 +487,7 @@
 	            	    	
 	            	    	geojson_data = derive_directions(from,to,by);
 	            	    	if(geojson_data != null){
-		            	    	if(geojson_data.responseJSON.hasOwnProperty("features") && by!="plane"){
+		            	    	if(geojson_data.responseJSON.hasOwnProperty("features") && by!="plane" && by!="boat"){
 			            	    	distance_in_km = geojson_data.responseJSON.features[0].properties.summary[0].distance/1000
 			            	    	duration_h = geojson_data.responseJSON.features[0].properties.summary[0].duration/60/60
 			            	    	ascent = geojson_data.responseJSON.features[0].properties.summary[0].ascent
@@ -577,6 +507,10 @@
 		            	    	}else if(by=="plane"){
 		            	    		$('td:eq(2)', row).html($('td:eq(2)', row).html() +
 		            	    				"<br/>Planes do not care")
+		            	    		$('td:eq(0)', row).data('routejson',geojson_data.responseJSON);
+		            	    	}else if(by=="boat"){
+		            	    		$('td:eq(2)', row).html($('td:eq(2)', row).html() +
+		            	    				"<br/>Boats do not care")
 		            	    		$('td:eq(0)', row).data('routejson',geojson_data.responseJSON);
 		            	    	}else{
 		            	    		$('td:eq(2)', row).html($('td:eq(2)', row).html() +
