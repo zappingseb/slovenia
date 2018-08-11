@@ -386,27 +386,43 @@
 		}
 		
 		function derive_directions(from,to,by) {
-			var outjson
-		    var api_key = "";
-		    $.ajax({url: './api_key.txt',
-            type: 'get',
-            async: false,
-            success: function(html) {
-            	var twig = String(html);
-            	api_key = api_key + twig
-            }
-		    })
-		    outjson = $.getJSON( {url:"https://api.openrouteservice.org/directions?api_key="+
-	    		api_key
-	    		+"&coordinates="+from[0]+"%2C"+from[1]+"%7C"+to[0]+"%2C"+to[1]+"&profile="+by+"&elevation=true&format=geojson", 
-				function( data ) {
-				  var items = [];
-				  $.each( data, function( key, val ) {
-				    alert(key)
-				  });  
-		    },
-			  async: false
-		    });
+			if(by=="plane"){
+				text = '{"features":['+
+				  '{"geometry":{'+
+					 '  "type": "LineString",'+
+					  ' "coordinates": ['+
+					   '['+
+					        from[0]+','+ from[1] + '],['+to[0]+','+to[1]+
+					    ']'+
+					  ' ]'+
+					'},"type":"Feature","id":"1"}]'+
+				',"type":"FeatureCollection"}'
+				var outjson = {
+					responseJSON: JSON.parse(text)
+				};
+			}else{
+				var outjson
+			    var api_key = "";
+			    $.ajax({url: './api_key.txt',
+	            type: 'get',
+	            async: false,
+	            success: function(html) {
+	            	var twig = String(html);
+	            	api_key = api_key + twig
+	            }
+			    })
+			    outjson = $.getJSON( {url:"https://api.openrouteservice.org/directions?api_key="+
+		    		api_key
+		    		+"&coordinates="+from[0]+"%2C"+from[1]+"%7C"+to[0]+"%2C"+to[1]+"&profile="+by+"&elevation=true&format=geojson", 
+					function( data ) {
+					  var items = [];
+					  $.each( data, function( key, val ) {
+					    alert(key)
+					  });  
+			    },
+				  async: false
+			    });
+			}
 		    return outjson
 		}//derive_directions
 		
@@ -476,8 +492,8 @@
 				"serverSide": true,
 				"bProcessing":true,
 				"sAjaxDataProp": "feed.entry",
-				"searching":false,
-				"sAjaxSource": "https://spreadsheets.google.com/feeds/list/18RNz9xkD-cCadsKuPFw9-Y6r7MimFIgarJtkg27TK2U/2/public/values?alt=json",
+				"searching":false,                                         
+				"sAjaxSource": "https://spreadsheets.google.com/feeds/list/1zXTVUgcHL5G_PdAsG98cw6AdFr9TpnF1hCNX0t5Z12Y/2/public/values?alt=json",
 				"aoColumns": [
 				{ "mDataProp": "gsx$day.$t" },
 				{ "mDataProp": "gsx$name.$t" },
@@ -530,6 +546,8 @@
 	            	    			by = "driving-car"
 	            	    		}else if(table.rows(index).data()[0].gsx$by['$t']=="feet"){
 									by = "foot-walking"
+	            	    		}else if(table.rows(index).data()[0].gsx$by['$t']=="plane"){
+									by = "plane"
 								}else{
 	            	    			by = "cycling-road"
 	            	    		}
@@ -539,18 +557,27 @@
 	            	    	
 	            	    	geojson_data = derive_directions(from,to,by);
 	            	    	if(geojson_data != null){
-		            	    	if(geojson_data.responseJSON.hasOwnProperty("features")){
+		            	    	if(geojson_data.responseJSON.hasOwnProperty("features") && by!="plane"){
 			            	    	distance_in_km = geojson_data.responseJSON.features[0].properties.summary[0].distance/1000
 			            	    	duration_h = geojson_data.responseJSON.features[0].properties.summary[0].duration/60/60
 			            	    	ascent = geojson_data.responseJSON.features[0].properties.summary[0].ascent
 			            	    	descent = geojson_data.responseJSON.features[0].properties.summary[0].descent
 			            	    	
+			            	    	if(duration_h != null){duration = duration_h.toFixed(2)}else{duration = ""}
+			            	    	if(distance_in_km != null){distance_in_km = distance_in_km.toFixed(2)}else{distance_in_km = ""}
+			            	    	if(ascent != null){ascent = ascent.toFixed(2)}else{ascent = ""}
+			            	    	if(descent != null){descent = descent.toFixed(2)}else{descent = ""}
+			            	    	
 			            	    	$('td:eq(2)', row).html($('td:eq(2)', row).html() + 
-			            	    			"<br/>Duration (h): " + duration_h.toFixed(2) +
-			            	    			"<br/>Distance (km): " + distance_in_km.toFixed(2)+
-			            	    			"<br/>Ascent (m): " + ascent.toFixed(2)  +
-			            	    			"<br/>Descent (m): " + descent.toFixed(2));
+			            	    			"<br/>Duration (h): " + duration +
+			            	    			"<br/>Distance (km): " + distance_in_km+
+			            	    			"<br/>Ascent (m): " + ascent  +
+			            	    			"<br/>Descent (m): " + descent);
 			            	    	$('td:eq(0)', row).data('routejson',geojson_data.responseJSON);
+		            	    	}else if(by=="plane"){
+		            	    		$('td:eq(2)', row).html($('td:eq(2)', row).html() +
+		            	    				"<br/>Planes do not care")
+		            	    		$('td:eq(0)', row).data('routejson',geojson_data.responseJSON);
 		            	    	}else{
 		            	    		$('td:eq(2)', row).html($('td:eq(2)', row).html() +
 		            	    				"<br/>Error in Calculating route")
@@ -620,7 +647,7 @@
 	            events.prepend( '<div><b>'+type+' selection</b> - '+JSON.stringify( rowData )+'</div>' );
 	        } )
 	        
-			mymap.setView([ 45.990623, 13.909995 ], 9);
+			mymap.setView([ -1.804161, 103.239614 ], 6);
 		});
 		
 		
