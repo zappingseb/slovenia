@@ -105,9 +105,12 @@
 	<h1>Slovenia Holiday</h1>
 
 	
-	<div id="mapcontrol" class="toggler" style="z-index:5;">Hide Map</div>
+	<div id="mapcontrol" class="toggler">Hide Map</div>
 	<div id="mapwrapper" style="z-index:5;" class="active">
+		<div id="fullscreen">
+		</div>
 		<div id="mapid"></div>
+		
 	</div>
 
 
@@ -132,7 +135,6 @@
 	$("#mapcontrol").click(function(e) {
 		if ($("#mapwrapper").hasClass("active")) {
 			$(this).text("Show map");
-			
 			$(this).toggleClass("active");
 		} else {
 			$(this).text("Hide map");
@@ -150,6 +152,8 @@
 				$(this).text("Highlights");
 			}
 		$("#highlights-change").toggleClass("active");
+		$("#routes-change").removeClass("active");
+		$("#trains-change").removeClass("active");
 
 	})
 
@@ -162,6 +166,8 @@
 				$(this).text("Bike Routes");
 			}
 		$("#routes-change").toggleClass("active");
+		$("#highlights-change").removeClass("active");
+		$("#trains-change").removeClass("active");
 
 	})
 	$("#trains-change").click(function(e) {
@@ -173,7 +179,14 @@
 				$(this).text("Trains");
 			}
 		$("#trains-change").toggleClass("active");
+		$("#highlights-change").removeClass("active");
+		$("#routes-change").removeClass("active");
 
+	})
+	
+	$("#fullscreen").click(function(e){
+		$("#mapwrapper").toggleClass("fullscreen");	
+		$("#fullscreen").toggleClass("active");	
 	})
 	
 	var mymap = L.map('mapid').setView([45.990623, 13.909995 ], 9);
@@ -194,61 +207,62 @@
 						id : 'mapbox.streets',
 						accessToken : 'pk.eyJ1IjoiemFwcGluZ3NlYiIsImEiOiJjaW14a2lhdTYwMGRmd2VtMmZhY2h0N2JtIn0.B3apneYn9eDwyl7x2gP0Og'
 					}).addTo(mymap);
-
+	
+	$("#mymap").append()
 	// Backend for highlights stored in GDrive
 	// Get the Spreadsheet containing all highlights and add for each
 	// Highlight an on/off switch
-	$.getJSON(
-					"https://spreadsheets.google.com/feeds/list/18RNz9xkD-cCadsKuPFw9-Y6r7MimFIgarJtkg27TK2U/1/public/values?alt=json",
-					function(data) {
+// 	$.getJSON(
+// 					"https://spreadsheets.google.com/feeds/list/18RNz9xkD-cCadsKuPFw9-Y6r7MimFIgarJtkg27TK2U/1/public/values?alt=json",
+// 					function(data) {
 						
 						
-						//first row "title" column
-						for (i = 0; i < data.feed.entry.length; i++) {
-							if(data.feed.entry[i]['gsx$image']['$t']==""){
-								image_link=""
-							}else{
-								var pattern = /((http|https|ftp|data\:image).*)/;
-								if(pattern.test(data.feed.entry[i]['gsx$image']['$t'])){
+// 						//first row "title" column
+// 						for (i = 0; i < data.feed.entry.length; i++) {
+// 							if(data.feed.entry[i]['gsx$image']['$t']==""){
+// 								image_link=""
+// 							}else{
+// 								var pattern = /((http|https|ftp|data\:image).*)/;
+// 								if(pattern.test(data.feed.entry[i]['gsx$image']['$t'])){
 									
-									image_link  = "<div class='image'><img src='"+data.feed.entry[i]['gsx$image']['$t']+"'/>" + 
-										"<br/><a style='font-size:4px;color:#e2e2e2'>from: "+data.feed.entry[i]['gsx$image']['$t']+"</a>"+
-										"</div>"
+// 									image_link  = "<div class='image'><img src='"+data.feed.entry[i]['gsx$image']['$t']+"'/>" + 
+// 										"<br/><a style='font-size:4px;color:#e2e2e2'>from: "+data.feed.entry[i]['gsx$image']['$t']+"</a>"+
+// 										"</div>"
 									
-								}else{
+// 								}else{
 									
-									image_link  = "<div class='image'><img src='./img/"+data.feed.entry[i]['gsx$image']['$t']+"'/></div>"
-								}
-							}
+// 									image_link  = "<div class='image'><img src='./img/"+data.feed.entry[i]['gsx$image']['$t']+"'/></div>"
+// 								}
+// 							}
 							
 							
-							$("#highlights ul")
-									.append(
-											"<li>"+
-											"<div class='highlight'>"+
-											"<div class='pretty p-switch p-slim' onclick='addmarker(this)' href='#' data-long='"
-														+
-														// Get the Longitudinal and Latitudinal coordinates of the Highlight
-														data.feed.entry[i]['gsx$long']['$t']
-														+ "' data-lat='"
-														+ data.feed.entry[i]['gsx$lat']['$t']
-														+ "' data-name='"
-														+ data.feed.entry[i]['gsx$ort']['$t']
-														+ "' data-icon='"
-														+ data.feed.entry[i]['gsx$typ']['$t']
-														+ "'>"
-														+ "<input type='checkbox' /><div class='state'><label>"
-														+
-														// Insert the name (Ort) of the field
-														data.feed.entry[i]['gsx$ort']['$t']
-														+ "</label></div></div>"
+// 							$("#highlights ul")
+// 									.append(
+// 											"<li>"+
+// 											"<div class='highlight'>"+
+// 											"<div class='pretty p-switch p-slim' onclick='addmarker(this)' href='#' data-long='"
+// 														+
+// 														// Get the Longitudinal and Latitudinal coordinates of the Highlight
+// 														data.feed.entry[i]['gsx$long']['$t']
+// 														+ "' data-lat='"
+// 														+ data.feed.entry[i]['gsx$lat']['$t']
+// 														+ "' data-name='"
+// 														+ data.feed.entry[i]['gsx$ort']['$t']
+// 														+ "' data-icon='"
+// 														+ data.feed.entry[i]['gsx$typ']['$t']
+// 														+ "'>"
+// 														+ "<input type='checkbox' /><div class='state'><label>"
+// 														+
+// 														// Insert the name (Ort) of the field
+// 														data.feed.entry[i]['gsx$ort']['$t']
+// 														+ "</label></div>"
 														
-														+ "<br/>"+image_link+"<br/><p>"+
-														data.feed.entry[i]['gsx$description']['$t']
-														+"</p>"+
-														"</div></li>")
-							}
-		});
+// 														+ "<br/>"+image_link+"<br/><p>"+
+// 														data.feed.entry[i]['gsx$description']['$t']
+// 														+"</p>"+
+// 														"</div></div></li>")
+// 							}
+// 		});
 
 		// function to add a marker element to the map
 		addmarker = function(element) {
@@ -267,7 +281,7 @@
 											this.getAttribute("data-lat") ],
 								{icon:L.AwesomeMarkers.icon({
 								    icon: this.getAttribute("data-icon"),
-								    markerColor: 'red',
+								    markerColor: 'blue',
 								    prefix: 'fa'
 								  })}			
 								).bindPopup(this.getAttribute("data-name"))
@@ -396,9 +410,58 @@
 		    return outjson
 		}//derive_directions
 		
+		// A function to append highlights to the id element
+		append_highlights = function(id, data){
+			
+			// Check how the image link is provided
+			if(data['gsx$image']['$t']==""){
+				image_link=""
+			}else{
+				var pattern = /((http|https|ftp|data\:image).*)/;
+				if(pattern.test(data['gsx$image']['$t'])){
+					
+					image_link  = "<div class='image'><img src='"+data['gsx$image']['$t']+"'/>" + 
+						"<br/><a style='font-size:4px;color:#e2e2e2'>from: "+data['gsx$image']['$t']+"</a>"+
+						"</div>"
+					
+				}else{
+					
+					image_link  = "<div class='image'><img src='./img/"+data['gsx$image']['$t']+"'/></div>"
+				}
+			}
+			
+			// append an element to the id ul
+			$("#"+id+" ul")
+					.append(
+							"<li>"+
+							"<div class='highlight'>"+
+							"<div class='pretty p-switch p-slim' onclick='addmarker(this)' href='#' data-long='"
+										+
+										// Get the Longitudinal and Latitudinal coordinates of the Highlight
+										data['gsx$long']['$t']
+										+ "' data-lat='"
+										+ data['gsx$lat']['$t']
+										+ "' data-name='"
+										+ data['gsx$name']['$t']
+										+ "' data-icon='"
+										+ data['gsx$icon']['$t']
+										+ "'>"
+										+ "<input type='checkbox' /><div class='state'><label>"
+										+
+										// Insert the name (Ort) of the field
+										data['gsx$name']['$t']
+										+ "</label>"
+										
+										+ "<br/>"+image_link+"<br/></div></div><p>"+
+										data['gsx$description']['$t']
+										+"</p>"+
+										"</div></li>")
+		}// append_highlgihts
 		
 		// Start showing Routes and trains
 		$(document).ready(function(e) {
+			$("body").css("font-size",
+					($(window).width()/100+$(window).height()/100)+"px")
 
 			$("#routes").find("div.pretty").each(function(e) {
 				addRoute(this)
@@ -475,18 +538,27 @@
 	            	    	}
 	            	    	
 	            	    	geojson_data = derive_directions(from,to,by);
-	            	    	distance_in_km = geojson_data.responseJSON.features[0].properties.summary[0].distance/1000
-	            	    	duration_h = geojson_data.responseJSON.features[0].properties.summary[0].duration/60/60
-	            	    	ascent = geojson_data.responseJSON.features[0].properties.summary[0].ascent
-	            	    	descent = geojson_data.responseJSON.features[0].properties.summary[0].descent
-	            	    	
-	            	    	$('td:eq(2)', row).html($('td:eq(2)', row).html() + 
-	            	    			"<br/>Duration (h): " + duration_h.toFixed(2) +
-	            	    			"<br/>Distance (km): " + distance_in_km.toFixed(2)+
-	            	    			"<br/>Ascent (m): " + ascent.toFixed(2)  +
-	            	    			"<br/>Descent (m): " + descent.toFixed(2))
-	            	    			;
-	            	    	$('td:eq(0)', row).data('routejson',geojson_data.responseJSON);
+	            	    	if(geojson_data != null){
+		            	    	if(geojson_data.responseJSON.hasOwnProperty("features")){
+			            	    	distance_in_km = geojson_data.responseJSON.features[0].properties.summary[0].distance/1000
+			            	    	duration_h = geojson_data.responseJSON.features[0].properties.summary[0].duration/60/60
+			            	    	ascent = geojson_data.responseJSON.features[0].properties.summary[0].ascent
+			            	    	descent = geojson_data.responseJSON.features[0].properties.summary[0].descent
+			            	    	
+			            	    	$('td:eq(2)', row).html($('td:eq(2)', row).html() + 
+			            	    			"<br/>Duration (h): " + duration_h.toFixed(2) +
+			            	    			"<br/>Distance (km): " + distance_in_km.toFixed(2)+
+			            	    			"<br/>Ascent (m): " + ascent.toFixed(2)  +
+			            	    			"<br/>Descent (m): " + descent.toFixed(2));
+			            	    	$('td:eq(0)', row).data('routejson',geojson_data.responseJSON);
+		            	    	}else{
+		            	    		$('td:eq(2)', row).html($('td:eq(2)', row).html() +
+		            	    				"<br/>Error in Calculating route")
+		            	    	}
+	            	    	}else{
+	            	    		$('td:eq(2)', row).html($('td:eq(2)', row).html() +
+	            	    				"<br/>Error in Calculating route")
+	            	    	}
 	            	    }else{
 	            	    	$('td:eq(0)', row).data('lat',table.rows(index).data()[0].gsx$lat['$t']);
 	            	    	$('td:eq(0)', row).data('long',table.rows(index).data()[0].gsx$long['$t']);
@@ -516,7 +588,15 @@
 							}
 							 $('td:eq(3)', row).html(image_link)
 	            	 	 }
+	            	 	
+	            	 	if( table.rows(index).data()[0].gsx$highlight['$t'] == "1" ){
+	            	 		
+	            	 		append_highlights("highlights", table.rows(index).data()[0])
+	            	 		
+	            	 	}
 	            	  }
+			
+			
 			});
 			$('#example tbody').on( 'click', 'tr', function () {
 				if ( $(this).hasClass('selected') ) {
@@ -542,6 +622,8 @@
 	        
 			mymap.setView([ 45.990623, 13.909995 ], 9);
 		});
+		
+		
 	</script>
 </body>
 </html>

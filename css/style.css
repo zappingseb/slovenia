@@ -24,19 +24,25 @@ body{
 	width:5%;
 	right:0px;
 	top:0px;
+	width: 20%;
+	z-index:1005;
 }
 #mapid { height: 100%; width:100% }
 
 #mapwrapper{
 	position: fixed;
     right: 0;
-    top: 50px;
+    top: 3em;
     visibility: hidden;
     width: 50%;
     height: 100%;
 }
+
+#mapwrapper.fullscreen{
+	width: 100%;
+}
+
 #mapwrapper.active{
-	width:50%;
 	visibility:visible;
 }
 
@@ -66,16 +72,17 @@ td div.image {
 	 top:0px;
 	 left:0px;
 	 position:fixed;
-	 z-index:5
+	 z-index:1005;
+	 width: 100%;
 }
 .fixy{
     width: 50%;
     position:fixed;
     border-bottom: 2px solid black;
-    z-index:5;
+    z-index:1005;
     bottom:50px;
-    overflow: scroll;
-    top: 50px;
+    overflow: hidden;
+    top: 3em;
     left:0px;
 }
 
@@ -83,6 +90,9 @@ td div.image {
 	visibility:hidden;
 }
 
+#highlights{
+	overflow:scroll;
+}
 
 .fixy.active{
 	width:50%;
@@ -91,7 +101,9 @@ td div.image {
 	
 }
 
-
+.pretty{
+	max-width:100%;
+}
 .toggler {
   color: #fff;
   background-color: #193047;
@@ -101,11 +113,48 @@ td div.image {
   border-radius: 8px;
   padding: 10px;
   float:left;
+  width: 20%;
+  height: 2em;
+  text-align:  center;
 }
 
 .toggler:hover {
   box-shadow: inset 0 0 0 1px #27496d,0 1px 2px #ffffff;
 }
 .toggler.active {
-  box-shadow: inset 0 0 0 1px #27496d,inset 0 1px 4px #ffffff;
+  box-shadow: inset 0 0 0 1px #000000, inset 0 1px 4px #ffffff;
+  background-color: #b6c8ea;
+  color: black;
+  /* border: 1px solid black; */
+}
+
+/* Inserting a fullscreen button for  the Map*/
+div#fullscreen {
+    z-index: 1001;
+    width: 15%;
+    height: 15%;
+    top: 1em;
+    right: 1em;
+    position: absolute;
+}
+#fullscreen:after {
+        content: "";
+    z-index: 1001;
+    background-image: url(../img/fullscreen.png);
+    background-size: 100% auto;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+}
+#fullscreen.active{
+width: 7.5%;
+height: 7.5%    
+}
+#fullscreen.active:after {
+    background-image: url("../img/cancel.png");
+    
+}
+div#fullscreen:hover {
+    filter: brightness(3) grayscale(0.1);
 }
