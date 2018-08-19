@@ -362,7 +362,9 @@
 				  async: false
 			    });
 			    if(outjson.statusText.includes('Error')){
-					return(JSON.parse('{"error":"test"}'))
+			    	var outjson = {
+							responseJSON: JSON.parse('{"error":"test"}')
+						};
 				}
 			}
 			
