@@ -503,7 +503,8 @@
 	            	    		by="driving-car"
 	            	    	}
 	            	    	
-	            	    	geojson_data = derive_directions(from,to,by);
+	            	    	geojson_data = derive_directions(from, to, by);
+	            	    	console.log(geojson_data)
 	            	    	if(geojson_data != null){
 		            	    	if(geojson_data.responseJSON.hasOwnProperty("features") && by!="plane" && by!="boat"){
 			            	    	distance_in_km = geojson_data.responseJSON.features[0].properties.summary[0].distance/1000
