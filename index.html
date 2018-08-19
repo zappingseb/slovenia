@@ -3,7 +3,6 @@
 <script src="js/jquery-3.3.1.min.js"></script>
 <script src="js/jquery-ui.min.js"></script>
 
-<link rel="stylesheet" type="text/css" media="all" href="css/style.css">
 <link rel="stylesheet" type="text/css" media="all" href="css/pretty-checkbox.min.css">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
 <link rel="stylesheet" href="https:////cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
@@ -17,23 +16,34 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.3.1/gpx.min.js"></script></head>
 <script src="js/leaflet.awesome-markers.min.js"></script>
 <script src="http://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-<body>
-<div id="left_changes">
-	<div id="highlights-change" class="toggler">Highlights</div>
 
-</div>
-	<div id="highlights" class="fixy">
-		<ul>
-		</ul>
+<link rel="stylesheet" type="text/css" media="all" href="css/style.css">
+
+<body>
+	<div id="menu">
+		<div class="top"><img src="./img/menu-button-of-three-horizontal-lines.png" width="20%"></div>
+		<div id="highlights-change" class="pretty p-switch p-slim">
+			<input type='checkbox' />
+			<div class='state'>
+				<label>Highlights</label>
+			</div>
+		</div>
+		<p>Allows you to show pictures of highlights and add them to the map</p>
+		<div id="mapcontrol" class="pretty p-switch p-slim">
+			<input type='checkbox' checked/>
+			<div class='state'>
+				<label>Map</label>
+			</div>
+		</div>
+		<p>Show/Hide the map</p>
 	</div>
-	
+	<div id="highlights" class="fixy"><ul></ul></div>
 	<table id="example" style="z-index:0"></div>
 
 	<div style="height:50px"></div>
 	<h1>Indonesia Holiday</h1>
 
 	
-	<div id="mapcontrol" class="toggler">Hide Map</div>
 	<div id="mapwrapper" style="z-index:5;" class="active">
 		<div id="fullscreen">
 		</div>
@@ -61,27 +71,27 @@
 
 	// Show or hide the map
 	$("#mapcontrol").click(function(e) {
-		if ($("#mapwrapper").hasClass("active")) {
-			$(this).text("Show map");
-			$(this).toggleClass("active");
-		} else {
-			$(this).text("Hide map");
-			$(this).toggleClass("active");
-		}
+// 		if ($("#mapwrapper").hasClass("active")) {
+// 			$(this).text("Show map");
+// 			$(this).toggleClass("active");
+// 		} else {
+// 			$(this).text("Hide map");
+// 			$(this).toggleClass("active");
+// 		}
 		$("#mapwrapper").toggleClass("active");
 
 	})
 	$("#highlights-change").click(function(e) {
 		$("#highlights").toggleClass("active");
-		$("#routes").removeClass("active");
-		$("#trains").removeClass("active");
-		if ($("#highlights").hasClass("active")) {
-			$(this).text("Hide Highlights");}else{
-				$(this).text("Highlights");
-			}
-		$("#highlights-change").toggleClass("active");
-		$("#routes-change").removeClass("active");
-		$("#trains-change").removeClass("active");
+// 		$("#routes").removeClass("active");
+// 		$("#trains").removeClass("active");
+// 		if ($("#highlights").hasClass("active")) {
+// 			$(this).text("Hide Highlights");}else{
+// 				$(this).text("Highlights");
+// 			}
+// 		$("#highlights-change").toggleClass("active");
+// 		$("#routes-change").removeClass("active");
+// 		$("#trains-change").removeClass("active");
 
 	})
 
@@ -115,6 +125,7 @@
 	$("#fullscreen").click(function(e){
 		$("#mapwrapper").toggleClass("fullscreen");	
 		$("#fullscreen").toggleClass("active");	
+		setTimeout(function(){ mymap.invalidateSize()}, 400);
 	})
 	
 	var mymap = L.map('mapid').setView([45.990623, 13.909995 ], 9);
@@ -413,6 +424,9 @@
 			$("#trains").find("div.pretty").each(function(e) {
 				addTrain(this)
 			});
+			$("#menu>div.top").click(function(e){
+				$(this).parent().toggleClass("show")
+			});
 			var events = $('#events');
 			var table = $('#example').DataTable( {
 				"bServerSide":false,
@@ -442,6 +456,10 @@
 				               { "title": "Long", "targets": 6 },
 				               { "title": "Lat", "targets": 7 }
 				             ],
+	             'createdRow': function(row, data, dataIndex){
+	                 $('td:eq(3)', row).css('min-width', '44rem');
+	                 $('td:eq(4)', row).css('max-width', '25rem');
+	              },
 	             "rowCallback": function( row, data, index  ) {
 	            	 	// in case this is not a place but a route or a connection
 	            	    if ( table.rows(index).data()[0].gsx$long['$t'] == "" ) {
