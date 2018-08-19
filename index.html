@@ -361,7 +361,11 @@
 			    },
 				  async: false
 			    });
+			    if(outjson.statusText.includes('Error')){
+					return(JSON.parse('{"error":"test"}'))
+				}
 			}
+			
 		    return outjson
 		}//derive_directions
 		
@@ -505,7 +509,7 @@
 	            	    	
 	            	    	geojson_data = derive_directions(from, to, by);
 	            	    	console.log(geojson_data)
-	            	    	if(geojson_data != null && !geojson_data.statusText.includes('Error')){
+	            	    	if(geojson_data != null){
 		            	    	if(geojson_data.responseJSON.hasOwnProperty("features") && by!="plane" && by!="boat"){
 			            	    	distance_in_km = geojson_data.responseJSON.features[0].properties.summary[0].distance/1000
 			            	    	duration_h = geojson_data.responseJSON.features[0].properties.summary[0].duration/60/60
