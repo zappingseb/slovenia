@@ -16,6 +16,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.3.1/gpx.min.js"></script></head>
 <script src="js/leaflet.awesome-markers.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
 
 <link rel="stylesheet" type="text/css" media="all" href="css/style.css">
 
@@ -37,9 +38,11 @@
 		</div>
 		<p>Show/Hide the map</p>
 	</div>
-	<div id="highlights" class="fixy"><ul></ul></div>
-	<table id="example" style="z-index:0"></div>
-
+	<div id="highlights" class="fixy"><ul></ul>
+	</div>
+	<div class="table-responsive">  
+		<table id="example" style="z-index:0" />
+	</div>
 	<div style="height:50px"></div>
 	<h1>Indonesia Holiday</h1>
 
@@ -50,8 +53,6 @@
 		<div id="mapid"></div>
 		
 	</div>
-
-
 
 	<script type="text/javascript">
 
@@ -439,8 +440,11 @@
 				"paging":false,
 				"serverSide": true,
 				"bProcessing":true,
+				"bAutoWidth":false,
 				"sAjaxDataProp": "feed.entry",
-				"searching":false,                                         
+				"searching":false,   
+				"responsive": true,
+				"autoWidth": false,
 				"sAjaxSource": "https://spreadsheets.google.com/feeds/list/1zXTVUgcHL5G_PdAsG98cw6AdFr9TpnF1hCNX0t5Z12Y/2/public/values?alt=json",
 				"aoColumns": [
 				{ "mDataProp": "gsx$day.$t" },
@@ -453,19 +457,19 @@
 				{ "mDataProp": "gsx$lat.$t" }
 				],
 				"columnDefs": [
-				               { "title": "Tag", "targets": 0 },
-				               { "title": "Name", "targets": 1 },
-				               { "title": "Duration", "targets": 2 },
-				               { "title": "Image", "targets": 3 },
-				               { "title": "Description", "targets": 4 },
-				               { "title": "Cost", "targets": 5 },
-				               { "title": "Long", "targets": 6 },
-				               { "title": "Lat", "targets": 7 }
+				               { "title": "Tag", "targets": 0, "responsivePriority": 2 },
+				               { "title": "Name", "targets": 1, "responsivePriority": 1 },
+				               { "title": "Duration", "targets": 2, "responsivePriority": 1 },
+				               { "title": "Image", "targets": 3 , "responsivePriority": 1},
+				               { "title": "Description", "targets": 4, "responsivePriority": 2 },
+				               { "title": "Cost", "targets": 5, "responsivePriority": 2 },
+				               { "title": "Long", "targets": 6, "responsivePriority": 2 },
+				               { "title": "Lat", "targets": 7, "responsivePriority": 2 }
 				             ],
-	             'createdRow': function(row, data, dataIndex){
-	                 $('td:eq(3)', row).css('min-width', '44rem');
-	                 $('td:eq(4)', row).css('max-width', '25rem');
-	              },
+// 	             'createdRow': function(row, data, dataIndex){
+// 	                 $('td:eq(3)', row).css('min-width', '44rem');
+// 	                 $('td:eq(4)', row).css('max-width', '25rem');
+// 	              },
 	             "rowCallback": function( row, data, index  ) {
 	            	 	// in case this is not a place but a route or a connection
 	            	    if ( table.rows(index).data()[0].gsx$long['$t'] == "" ) {
@@ -510,7 +514,6 @@
 	            	    	}
 	            	    	
 	            	    	geojson_data = derive_directions(from, to, by);
-	            	    	console.log(geojson_data)
 	            	    	if(geojson_data != null){
 		            	    	if(geojson_data.responseJSON.hasOwnProperty("features") && by!="plane" && by!="boat"){
 			            	    	distance_in_km = geojson_data.responseJSON.features[0].properties.summary[0].distance/1000
